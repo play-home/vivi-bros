@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Juego Dino Personalizado</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { text-align: center; font-family: Arial, sans-serif; background: #f4f4f4; }
+    canvas { background: white; display: block; margin: 20px auto; border: 1px solid #000; }
+  </style>
+</head>
+<body>
+  <h1>EL Vivi Bross</h1>
+  <canvas id="gameCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 800;
+    canvas.height = 200;
+
+    let gameOver = false;
+    let velocidad = 6;
+    let gravedad = 1.5;
+
+    // Cargar imágenes
+    const fondo = new Image();
+    fondo.src = "img/fondo.png"; // Imagen 800x200
+
+    const personaje = new Image();
+    personaje.src = "img/personaje.png"; // Imagen 67x93
+
+    const imagenObstaculo = new Image();
+    imagenObstaculo.src = "img/obstaculo.png"; // Imagen original 550x432, escalada a 50x50
+
+    const personajeAncho = 67, personajeAlto = 93;
+    const obstaculoAncho = 50, obstaculoAlto = 50;
+    const suelo = 28; // Margen inferior del suelo
+
+    // Jugador
+    const jugador = {
+      x: 50,
+      y: canvas.height - personajeAlto - suelo,
+      width: personajeAncho,
+      height: personajeAlto,
+      dy: 0,
+      saltando: false,
+      dibujar() {
+        ctx.drawImage(personaje, this.x, this.y, this.width, this.height);
+      },
+      actualizar() {
+        if (this.saltando) {
+          this.dy += gravedad;
+          this.y += this.dy;
+          if (this.y >= canvas.height - personajeAlto - suelo) {
+            this.y = canvas.height - personajeAlto - suelo;
+            this.saltando = false;
+          }
+        }
+        this.dibujar();
+      },
+      saltar() {
+        if (!this.saltando) {
+          this.dy = -20;
+          this.saltando = true;
+        }
+      }
+    };
+
+    // Obstáculo
+    const obstaculo = {
+      x: canvas.width,
+      y: canvas.height - obstaculoAlto - suelo,
+      width: obstaculoAncho,
+      height: obstaculoAlto,
+      dibujar() {
+        ctx.drawImage(imagenObstaculo, this.x, this.y, this.width, this.height);
+      },
+      actualizar() {
+        this.x -= velocidad;
+        if (this.x + this.width < 0) {
+          this.x = canvas.width + Math.random() * 200;
+        }
+        this.dibujar();
+      }
+    };
+
+    // Colisión con margen de seguridad
+    function colision(jugador, obstaculo) {
+      const margen = 15;
+      return (
+        jugador.x + margen < obstaculo.x + obstaculo.width &&
+        jugador.x + jugador.width - margen > obstaculo.x &&
+        jugador.y + margen < obstaculo.y + obstaculo.height &&
+        jugador.y + jugador.height - margen > obstaculo.y
+      );
+    }
+
+    // Bucle del juego
+    function actualizarJuego() {
+      if (gameOver) return;
+
+      // Dibujar fondo
+      ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+      // Actualizar elementos
+      jugador.actualizar();
+      obstaculo.actualizar();
+
+      if (colision(jugador, obstaculo)) {
+        gameOver = true;
+        alert("¡Perdiste! Recarga la página para jugar de nuevo.");
+      } else {
+        requestAnimationFrame(actualizarJuego);
+      }
+    }
+
+    // Controles
+    document.addEventListener("keydown", function (event) {
+      if (event.code === "Space") {
+        jugador.saltar();
+      }
+    });
+
+    // Iniciar cuando se carguen todas las imágenes
+    let imagenesCargadas = 0;
+    function verificarCarga() {
+      imagenesCargadas++;
+      if (imagenesCargadas === 3) {
+        actualizarJuego();
+      }
+    }
+
+    fondo.onload = verificarCarga;
+    personaje.onload = verificarCarga;
+    imagenObstaculo.onload = verificarCarga;
+  </script>
+</body>
+</html>
