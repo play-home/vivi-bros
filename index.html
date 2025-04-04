@@ -7,13 +7,12 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { text-align: center; font-family: Arial, sans-serif; background: #f4f4f4; }
-    canvas { background: white; display: block; margin: 20px auto; border: 1px solid #000; }
+    canvas { background: white; display: block; margin: 20px auto; border: 1px solid #000; touch-action: manipulation; }
   </style>
 </head>
 <body>
   <h1>EL Vivi Bross</h1>
   <canvas id="gameCanvas"></canvas>
-
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -25,21 +24,19 @@
     let velocidad = 6;
     let gravedad = 1.5;
 
-    // Cargar imágenes
     const fondo = new Image();
-    fondo.src = "img/fondo.png"; // Imagen 800x200
+    fondo.src = "img/fondo.png";
 
     const personaje = new Image();
-    personaje.src = "img/personaje.png"; // Imagen 67x93
+    personaje.src = "img/personaje.png";
 
     const imagenObstaculo = new Image();
-    imagenObstaculo.src = "img/obstaculo.png"; // Imagen original 550x432, escalada a 50x50
+    imagenObstaculo.src = "img/obstaculo.png";
 
     const personajeAncho = 67, personajeAlto = 93;
     const obstaculoAncho = 50, obstaculoAlto = 50;
-    const suelo = 28; // Margen inferior del suelo
+    const suelo = 28;
 
-    // Jugador
     const jugador = {
       x: 50,
       y: canvas.height - personajeAlto - suelo,
@@ -69,7 +66,6 @@
       }
     };
 
-    // Obstáculo
     const obstaculo = {
       x: canvas.width,
       y: canvas.height - obstaculoAlto - suelo,
@@ -87,7 +83,6 @@
       }
     };
 
-    // Colisión con margen de seguridad
     function colision(jugador, obstaculo) {
       const margen = 15;
       return (
@@ -98,14 +93,11 @@
       );
     }
 
-    // Bucle del juego
     function actualizarJuego() {
       if (gameOver) return;
 
-      // Dibujar fondo
       ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
 
-      // Actualizar elementos
       jugador.actualizar();
       obstaculo.actualizar();
 
@@ -117,14 +109,16 @@
       }
     }
 
-    // Controles
     document.addEventListener("keydown", function (event) {
       if (event.code === "Space") {
         jugador.saltar();
       }
     });
 
-    // Iniciar cuando se carguen todas las imágenes
+    canvas.addEventListener("touchstart", function () {
+      jugador.saltar();
+    });
+
     let imagenesCargadas = 0;
     function verificarCarga() {
       imagenesCargadas++;
